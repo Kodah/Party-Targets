@@ -93,17 +93,14 @@ PT:SetScript("OnEvent", function(self, event, arg1)
         PT:LoadPositions()
 
     elseif event == "ADDON_LOADED" and arg1 == "PartyTargets" then
-        print("Loaded addon")
         -- Our saved variables, if they exist, have been loaded at this point.
         if SETTINGS == nil then
-            print("Settings is nil")
             SETTINGS = {}
             SETTINGS.alignment1 = "CENTER"
             SETTINGS.alignment2 = "CENTER"
             SETTINGS.textAlignment = "CENTER"
             SETTINGS.showHealers = true
             
-            print("Loaded "..SETTINGS.alignment)
         end
 
     elseif event == "PLAYER_LOGOUT" then
