@@ -1,0 +1,6 @@
+## Interface: 70200
+## Title: PartyTargets
+## Notes: See what you meant to be hittin'
+## Author: Kodah
+## Dependencies: Blizzard_CompactRaidFrames
+PartyTargets.lua
