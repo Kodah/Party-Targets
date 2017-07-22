@@ -59,8 +59,10 @@ end
 
 function PT:UpdateFrame(anchor, frame) 
     local target = frame.unit.."-target"
+    if not SETTINGS.showHealers and UnitGroupRolesAssigned(frame.unit) == "HEALER" then return end 
     anchor.text:SetText(UnitName(target));
-    anchor:SetPoint("CENTER", frame, "CENTER")
+    anchor.text:SetJustifyH(SETTINGS.textAlignment);
+    anchor:SetPoint(SETTINGS.alignment1, frame, SETTINGS.alignment2)
     _, r = UnitClass(target);
     colour1 = RAID_CLASS_COLORS[r]
     if colour1 then 
@@ -78,7 +80,10 @@ end)
 
 PT:RegisterEvent("UNIT_TARGET");
 PT:RegisterEvent("GROUP_ROSTER_UPDATE")
-PT:SetScript("OnEvent", function(self, event, unitid)
+PT:RegisterEvent("ADDON_LOADED")
+PT:RegisterEvent("PLAYER_LOGOUT")
+
+PT:SetScript("OnEvent", function(self, event, arg1)
     
     if event == "UNIT_TARGET" and UnitInParty("player") then
        PT:LoadPositions()
@@ -86,7 +91,65 @@ PT:SetScript("OnEvent", function(self, event, unitid)
     elseif event == "GROUP_ROSTER_UPDATE" then 
         PT:CreateAnchors()
         PT:LoadPositions()
+
+    elseif event == "ADDON_LOADED" and arg1 == "PartyTargets" then
+        print("Loaded addon")
+        -- Our saved variables, if they exist, have been loaded at this point.
+        if SETTINGS == nil then
+            print("Settings is nil")
+            SETTINGS = {}
+            SETTINGS.alignment1 = "CENTER"
+            SETTINGS.alignment2 = "CENTER"
+            SETTINGS.textAlignment = "CENTER"
+            SETTINGS.showHealers = true
+            
+            print("Loaded "..SETTINGS.alignment)
+        end
+
+    elseif event == "PLAYER_LOGOUT" then
+        -- Save the time at which the character logs out
+        -- HaveWeMetLastSeen = time()
     end
 end)
 
 
+
+SLASH_PT1 = '/pt'
+function SlashCmdList.PT(msg)
+    if msg == "left" then 
+        SETTINGS.alignment1 = "RIGHT"
+        SETTINGS.alignment2 = "LEFT"
+        SETTINGS.textAlignment = "RIGHT"
+        print("Party Targets aligning left")
+        PT:LoadPositions()
+    elseif msg == "right" then 
+        SETTINGS.alignment1 = "LEFT"
+        SETTINGS.alignment2 = "Right"
+        SETTINGS.textAlignment = "LEFT"
+        print("Party Targets aligning right")
+        PT:LoadPositions()
+    elseif msg == "center" then 
+        SETTINGS.alignment1 = "CENTER"
+        SETTINGS.alignment2 = "CENTER"
+        SETTINGS.textAlignment = "CENTER"
+        print("Party Targets aligning center")
+        PT:LoadPositions()
+    elseif msg == "healers" then 
+        SETTINGS.showHealers = not SETTINGS.showHealers
+        if SETTINGS.showHealers then
+            print("Party Targets will show healer targets")
+        else
+            print("PartyTargets wont show healer targets")
+        end
+        PT:LoadPositions()
+    
+    else 
+        print("-- Party Targets --")
+        print("Command list :")
+        print("'pt left' - Align to left")
+        print("'pt center' - Align to center")
+        print("'pt right' - Align to right")
+        print("'pt healer' will toggle displaying healers targets")
+    end
+    
+end
