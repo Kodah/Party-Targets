@@ -3,7 +3,14 @@ local anchors = {}
 
 local InArena = function() return (select(2,IsInInstance()) == "arena") end
 
+function PT:HideAll() 
+    for _, anchor in ipairs(anchors) do 
+        anchor:Hide();
+    end
+end
+
 function PT:CreateAnchors()
+    PT:HideAll() 
 	for i=0,GetNumGroupMembers()  do
         if not anchors[i] then 
             local anchor = CreateFrame("Frame","PTAnchor"..i ,UIParent)
@@ -22,7 +29,6 @@ function PT:CreateAnchors()
             anchor:Hide();
             anchors[i] = anchor
         end 
-
 	end
 end
 
@@ -80,6 +86,7 @@ end)
 
 PT:RegisterEvent("UNIT_TARGET");
 PT:RegisterEvent("GROUP_ROSTER_UPDATE")
+PT:RegisterEvent("PARTY_MEMBERS_CHANGED")
 PT:RegisterEvent("ADDON_LOADED")
 PT:RegisterEvent("PLAYER_LOGOUT")
 
@@ -88,7 +95,8 @@ PT:SetScript("OnEvent", function(self, event, arg1)
     if event == "UNIT_TARGET" and UnitInParty("player") then
        PT:LoadPositions()
 
-    elseif event == "GROUP_ROSTER_UPDATE" then 
+    elseif event == "GROUP_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then 
+
         PT:CreateAnchors()
         PT:LoadPositions()
 
